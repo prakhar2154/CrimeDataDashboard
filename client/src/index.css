@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    
+    --card: 217.2 32.6% 17.5%;
+    --card-foreground: 210 40% 98%;
+    
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    
+    --primary: 221 83.2% 33.3%;
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    
+    --accent: 186 100% 53.5%;
+    --accent-foreground: 210 40% 98%;
+    
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+    
+    --chart-1: 186 100% 53.5%; /* neoncyan */
+    --chart-2: 0 62.8% 30.6%;  /* mutedred */
+    --chart-3: 221 83.2% 53.3%; /* navy-light */
+    --chart-4: 142 71% 45.3%;  /* green */
+    --chart-5: 47 96% 48%;     /* yellow */
+    
+    --sidebar-background: 221 83.2% 33.3%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 186 100% 53.5%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 221 83.2% 23.3%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 221 83.2% 43.3%;
+    --sidebar-ring: 186 100% 53.5%;
+    
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-montserrat;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-1.5 h-1.5;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-secondary;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground rounded;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/80;
+  }
+}
+
+@layer components {
+  .chart-container {
+    @apply relative h-60 w-full;
+  }
+  
+  .map-container {
+    @apply h-[300px] w-full rounded-lg relative;
+  }
+  
+  .map-pin {
+    @apply w-3 h-3 rounded-full absolute transform -translate-x-1/2 -translate-y-1/2;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+  }
+  
+  .tooltip {
+    @apply invisible absolute bg-secondary/95 text-foreground p-1 px-2 rounded text-xs whitespace-nowrap z-10 -top-8 left-1/2 -translate-x-1/2 transition-all opacity-0;
+  }
+  
+  .map-pin:hover .tooltip {
+    @apply visible opacity-100;
+  }
+  
+  .loading-shimmer {
+    @apply animate-pulse bg-secondary;
+  }
+  
+  .data-table th {
+    @apply sticky top-0 bg-secondary z-10;
+  }
+  
+  .font-montserrat {
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  .font-sans {
+    font-family: 'Inter', sans-serif;
+  }
+}
