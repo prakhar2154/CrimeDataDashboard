@@ -425,34 +425,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { type, search } = req.query;
       
-      // Subquery to count crimes per location
-      const subquery = db
-        .select({
-          locationId: crimeReports.locationId,
-          crimeCount: count(),
-        })
-        .from(crimeReports)
-        .groupBy(crimeReports.locationId)
-        .as('crime_counts');
-      
-      let query = db
+      // Simple approach without subquery to avoid potential issues
+      let locationsQuery = db
         .select({
           id: locations.id,
           address: locations.address,
           geolocation: locations.geolocation,
           typeOfAddress: locations.typeOfAddress,
-          crimeCount: subquery.crimeCount,
         })
-        .from(locations)
-        .leftJoin(subquery, eq(locations.id, subquery.locationId));
+        .from(locations);
       
       // Apply filters
       if (type && type !== 'all_types') {
-        query = query.where(eq(locations.typeOfAddress, type as string));
+        locationsQuery = locationsQuery.where(eq(locations.typeOfAddress, type as string));
       }
       
       if (search) {
-        query = query.where(
+        locationsQuery = locationsQuery.where(
           or(
             like(locations.address, `%${search}%`),
             like(locations.id, `%${search}%`)
@@ -460,7 +449,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
       }
       
-      const result = await query.orderBy(locations.id);
+      const locationsResult = await locationsQuery.orderBy(locations.id);
+      
+      // Now get crime counts separately and combine
+      const crimeCounts = await db
+        .select({
+          locationId: crimeReports.locationId,
+          count: count(),
+        })
+        .from(crimeReports)
+        .groupBy(crimeReports.locationId);
+      
+      // Combine the results
+      const result = locationsResult.map(location => {
+        const crimeData = crimeCounts.find(c => c.locationId === location.id);
+        return {
+          ...location,
+          crimeCount: crimeData ? crimeData.count : 0
+        };
+      });
+      
       res.json(result);
     } catch (error) {
       console.error('Error fetching locations:', error);
