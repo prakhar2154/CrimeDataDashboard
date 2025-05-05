@@ -238,8 +238,43 @@ export function ArrestStatusChart() {
       </CardHeader>
       <CardContent className="p-5">
         {selectedTab === "chart" ? (
-          <div className="chart-container h-[300px]">
-            <canvas ref={chartRef}></canvas>
+          <div>
+            <div className="chart-container h-[300px]">
+              <canvas ref={chartRef}></canvas>
+            </div>
+            
+            <div className="mt-6 bg-muted/30 border border-muted p-4 rounded-lg">
+              <h4 className="text-sm font-semibold mb-2 flex items-center">
+                <span className="material-icons text-accent text-sm mr-2">info</span>
+                Chart Explanation
+              </h4>
+              <p className="text-sm text-gray-300 mb-3">
+                This chart displays the distribution of case resolutions across three primary categories:
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 rounded-full bg-blue-600 mr-2"></div>
+                  <span className="text-sm"><strong>Arrested:</strong> Cases with successful arrests</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 rounded-full bg-amber-600 mr-2"></div>
+                  <span className="text-sm"><strong>Pending:</strong> Cases under active investigation</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 rounded-full bg-red-600 mr-2"></div>
+                  <span className="text-sm"><strong>No Arrest:</strong> Unresolved cases with no arrest</span>
+                </div>
+              </div>
+              <p className="text-sm text-gray-300">
+                The current arrest rate of <strong>{arrestRate}%</strong> indicates the percentage of cases where suspects were successfully apprehended. Higher arrest rates generally reflect effective police work and case resolution.
+              </p>
+              <div className="mt-3 text-xs text-gray-400 italic">
+                <span className="inline-flex items-center">
+                  <span className="material-icons text-accent text-xs mr-1">lightbulb</span>
+                  Tip: Click the button in the header to toggle between pie and bar chart views
+                </span>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
@@ -268,6 +303,11 @@ export function ArrestStatusChart() {
                       <span className="font-medium">{item.percentage}%</span>
                     </div>
                   </div>
+                  <div className="mt-3 text-xs text-gray-400">
+                    {item.status === 'Arrested' && 'Cases where suspects were successfully apprehended.'}
+                    {item.status === 'Pending' && 'Cases with ongoing investigations or court proceedings.'}
+                    {item.status === 'No Arrest' && 'Cases without successful suspect apprehension.'}
+                  </div>
                 </div>
               ))}
             </div>
@@ -290,6 +330,30 @@ export function ArrestStatusChart() {
                 <li className="flex items-start">
                   <span className="material-icons text-red-500 text-sm mr-2">priority_high</span>
                   <span>Cases without arrests may require additional resource allocation or follow-up.</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div className="mt-4 bg-muted/30 border border-muted p-4 rounded-lg">
+              <h4 className="text-sm font-semibold mb-2 flex items-center">
+                <span className="material-icons text-accent text-sm mr-2">analytics</span>
+                Performance Indicators
+              </h4>
+              <p className="text-sm text-gray-300 mb-3">
+                The arrest status distribution provides critical insights into departmental performance and resource allocation needs:
+              </p>
+              <ul className="space-y-2 text-sm text-gray-300">
+                <li className="flex items-start">
+                  <span className="material-icons text-blue-500 text-sm mr-2">trending_up</span>
+                  <span>An arrest rate of <strong>45%+</strong> is considered excellent, <strong>30-45%</strong> is average, and <strong>&lt;30%</strong> may require attention.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="material-icons text-amber-500 text-sm mr-2">balance</span>
+                  <span>A high percentage of pending cases may indicate case backlog or resource constraints in the department.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="material-icons text-green-500 text-sm mr-2">query_stats</span>
+                  <span>This data helps identify trends over time and measure the impact of specific enforcement initiatives.</span>
                 </li>
               </ul>
             </div>
