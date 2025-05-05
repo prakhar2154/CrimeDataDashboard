@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/badge-custom";
 import { useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
@@ -30,6 +31,13 @@ export default function Locations() {
     fixLeafletIcon();
     setMapReady(true);
   });
+  
+  // For search input to avoid page refresh
+  const [searchInput, setSearchInput] = useState("");
+  
+  const handleSearch = () => {
+    setSearchQuery(searchInput);
+  };
   
   const { data: locationsData, isLoading } = useQuery({
     queryKey: ['/api/locations', { type: addressType, search: searchQuery }],
@@ -124,33 +132,49 @@ export default function Locations() {
           
           <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-4 sm:gap-0">
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-              <Select 
-                value={addressType} 
-                onValueChange={setAddressType}
-              >
-                <SelectTrigger className="w-full sm:w-auto py-2 px-3 bg-muted rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-white text-sm border border-secondary">
-                  <SelectValue placeholder="All Types" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all_types">All Types</SelectItem>
-                  <SelectItem value="Residential">Residential</SelectItem>
-                  <SelectItem value="Commercial">Commercial</SelectItem>
-                  <SelectItem value="Public">Public</SelectItem>
-                  <SelectItem value="Industrial">Industrial</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="z-20">
+                <Select 
+                  value={addressType} 
+                  onValueChange={setAddressType}
+                >
+                  <SelectTrigger className="w-full sm:w-auto py-2 px-3 bg-muted rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-white text-sm border border-secondary">
+                    <SelectValue placeholder="All Types" />
+                  </SelectTrigger>
+                  <SelectContent position="popper" className="z-50" sideOffset={5}>
+                    <SelectItem value="all_types">All Types</SelectItem>
+                    <SelectItem value="Residential">Residential</SelectItem>
+                    <SelectItem value="Commercial">Commercial</SelectItem>
+                    <SelectItem value="Public">Public</SelectItem>
+                    <SelectItem value="Industrial">Industrial</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               
-              <div className="relative w-full sm:w-auto">
-                <Input
-                  type="text"
-                  placeholder="Search locations..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full py-2 px-3 bg-muted rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-white text-sm border border-secondary"
-                />
-                <span className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                  <span className="material-icons text-gray-400 text-sm">search</span>
-                </span>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <div className="relative flex-grow">
+                  <Input
+                    type="text"
+                    placeholder="Search locations..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    className="w-full py-2 px-3 bg-muted rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-white text-sm border border-secondary"
+                  />
+                  <button 
+                    onClick={handleSearch}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-accent"
+                  >
+                    <span className="material-icons text-sm">search</span>
+                  </button>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleSearch}
+                  className="h-10 hidden sm:inline-flex"
+                >
+                  Search
+                </Button>
               </div>
             </div>
             
@@ -211,13 +235,15 @@ export default function Locations() {
               Showing {startIdx + 1} to {endIdx} of {totalRecords} entries
             </div>
             <div className="flex items-center space-x-2">
-              <button 
+              <Button
+                variant="outline" 
+                size="icon"
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1 rounded border border-muted text-gray-400 hover:bg-muted transition-colors duration-150 ease-in-out disabled:opacity-50"
+                className="px-3 py-1 rounded border border-muted text-gray-400 hover:bg-muted transition-colors duration-150 ease-in-out"
               >
                 <span className="material-icons text-sm">arrow_back</span>
-              </button>
+              </Button>
               
               {Array.from({ length: Math.min(totalPages, 3) }, (_, i) => {
                 let pageNumber = currentPage;
@@ -227,8 +253,9 @@ export default function Locations() {
                 
                 if (pageNumber <= totalPages) {
                   return (
-                    <button
+                    <Button
                       key={pageNumber}
+                      variant={currentPage === pageNumber ? "default" : "outline"}
                       onClick={() => setCurrentPage(pageNumber)}
                       className={`px-3 py-1 rounded border ${
                         currentPage === pageNumber 
@@ -237,19 +264,21 @@ export default function Locations() {
                       }`}
                     >
                       {pageNumber}
-                    </button>
+                    </Button>
                   );
                 }
                 return null;
               })}
               
-              <button 
+              <Button
+                variant="outline" 
+                size="icon"
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1 rounded border border-muted text-gray-400 hover:bg-muted transition-colors duration-150 ease-in-out disabled:opacity-50"
+                className="px-3 py-1 rounded border border-muted text-gray-400 hover:bg-muted transition-colors duration-150 ease-in-out"
               >
                 <span className="material-icons text-sm">arrow_forward</span>
-              </button>
+              </Button>
             </div>
           </div>
         </CardContent>
