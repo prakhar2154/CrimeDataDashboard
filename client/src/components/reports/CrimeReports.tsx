@@ -12,11 +12,22 @@ import { useState } from "react";
 export function CrimeReportsTable() {
   const [crimeType, setCrimeType] = useState("all_types");
   const [arrestStatus, setArrestStatus] = useState("all_statuses");
+  const [dateRangeInput, setDateRangeInput] = useState("");
   const [dateRange, setDateRange] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCrime, setSelectedCrime] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Use debounce for search and date range
+  const handleSearch = () => {
+    setSearchQuery(searchInput);
+  };
+  
+  const handleDateRange = () => {
+    setDateRange(dateRangeInput);
+  };
   
   const { data: crimesData, isLoading } = useQuery({
     queryKey: ['/api/crimes', { type: crimeType, status: arrestStatus, dateRange, search: searchQuery }],
@@ -135,33 +146,61 @@ export function CrimeReportsTable() {
             
             <div className="col-span-1">
               <label className="block text-gray-400 text-sm font-medium mb-2">Date Range</label>
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="01/01/2023 - 07/31/2024"
-                  value={dateRange}
-                  onChange={(e) => setDateRange(e.target.value)}
-                  className="w-full py-2 px-3 bg-muted rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-white text-sm border border-secondary"
-                />
-                <span className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                  <span className="material-icons text-gray-400 text-sm">date_range</span>
-                </span>
+              <div className="flex items-center gap-2">
+                <div className="relative flex-grow">
+                  <Input
+                    type="text"
+                    placeholder="01/01/2023 - 07/31/2024"
+                    value={dateRangeInput}
+                    onChange={(e) => setDateRangeInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleDateRange()}
+                    className="w-full py-2 px-3 bg-muted rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-white text-sm border border-secondary"
+                  />
+                  <button 
+                    onClick={handleDateRange}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-accent"
+                  >
+                    <span className="material-icons text-sm">date_range</span>
+                  </button>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleDateRange}
+                  className="h-10"
+                >
+                  Apply
+                </Button>
               </div>
             </div>
             
             <div className="col-span-1">
               <label className="block text-gray-400 text-sm font-medium mb-2">Search</label>
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Search reports..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full py-2 px-3 bg-muted rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-white text-sm border border-secondary"
-                />
-                <span className="absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                  <span className="material-icons text-gray-400 text-sm">search</span>
-                </span>
+              <div className="flex items-center gap-2">
+                <div className="relative flex-grow">
+                  <Input
+                    type="text"
+                    placeholder="Search reports..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    className="w-full py-2 px-3 bg-muted rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-white text-sm border border-secondary"
+                  />
+                  <button 
+                    onClick={handleSearch}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-accent"
+                  >
+                    <span className="material-icons text-sm">search</span>
+                  </button>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleSearch}
+                  className="h-10"
+                >
+                  Search
+                </Button>
               </div>
             </div>
           </div>
@@ -177,7 +216,9 @@ export function CrimeReportsTable() {
                 onClick={() => {
                   setCrimeType("all_types");
                   setArrestStatus("all_statuses");
+                  setDateRangeInput("");
                   setDateRange("");
+                  setSearchInput("");
                   setSearchQuery("");
                 }}
               >
