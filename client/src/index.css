@@ -89,6 +89,19 @@
   
   .map-container {
     @apply h-[300px] w-full rounded-lg relative;
+    z-index: 0;
+  }
+  
+  .map-container .leaflet-container {
+    height: 100%;
+    width: 100%;
+    border-radius: 0.5rem;
+    z-index: 0;
+  }
+  
+  .custom-div-icon {
+    background: transparent;
+    border: none;
   }
   
   .map-pin {

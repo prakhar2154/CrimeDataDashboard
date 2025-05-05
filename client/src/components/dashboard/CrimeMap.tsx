@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Tooltip } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, ZoomControl } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { crimeTypeColors } from "@/lib/theme";
@@ -9,10 +9,11 @@ import { crimeTypeColors } from "@/lib/theme";
 // Fix for Leaflet marker icons in React
 const fixLeafletIcon = () => {
   delete (L.Icon.Default.prototype as any)._getIconUrl;
+  
   L.Icon.Default.mergeOptions({
-    iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-    iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-    shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
   });
 };
 
@@ -46,7 +47,7 @@ interface Location {
 export function CrimeMap() {
   const [mapReady, setMapReady] = useState(false);
   
-  const { data: locationsData, isLoading } = useQuery({
+  const { data: locationsData, isLoading } = useQuery<Location[]>({
     queryKey: ['/api/crime-locations'],
   });
   
@@ -60,6 +61,7 @@ export function CrimeMap() {
       <Card className="bg-secondary">
         <CardHeader>
           <CardTitle className="text-lg font-medium">Crime Locations</CardTitle>
+          <CardDescription>Geographic distribution of reported incidents</CardDescription>
         </CardHeader>
         <CardContent className="p-5">
           <div className="map-container animate-pulse bg-secondary-light rounded-md"></div>
@@ -75,7 +77,7 @@ export function CrimeMap() {
   }) : [];
   
   // Calculate center of the map
-  const calculateCenter = () => {
+  const calculateCenter = (): [number, number] => {
     if (locations.length === 0) return [40.7128, -74.0060]; // Default to NYC
     
     const validLocations = locations.filter((loc: Location) => {
@@ -90,15 +92,18 @@ export function CrimeMap() {
     return [lat, lng];
   };
   
+  const mapCenter = calculateCenter();
+  
   return (
     <Card className="bg-secondary">
       <CardHeader>
         <CardTitle className="text-lg font-medium">Crime Locations</CardTitle>
+        <CardDescription>Geographic distribution of reported incidents</CardDescription>
       </CardHeader>
       <CardContent className="p-5">
         <div className="map-container">
           <MapContainer 
-            center={calculateCenter() as [number, number]} 
+            center={mapCenter}
             zoom={10} 
             style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
             zoomControl={false}
@@ -106,14 +111,14 @@ export function CrimeMap() {
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              className="map-tiles"
             />
+            <ZoomControl position="bottomleft" />
             {locations.map((location: Location) => {
               const [lat, lng] = location.geolocation.split(',').map(Number);
               return (
                 <Marker 
                   key={location.id} 
-                  position={[lat, lng]} 
+                  position={[lat, lng] as [number, number]} 
                   icon={getMarkerIcon(location.crimeType)}
                 >
                   <Tooltip>

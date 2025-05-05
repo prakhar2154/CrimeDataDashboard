@@ -69,8 +69,8 @@ export function ArrestStatusChart() {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: chartType === 'doughnut' ? '65%' : undefined,
-        indexAxis: chartType === 'bar' ? 'y' : undefined,
+        ...(chartType === 'doughnut' ? { cutout: '65%' } : {}),
+        ...(chartType === 'bar' ? { indexAxis: 'y' } : {}),
         scales: chartType === 'bar' ? {
           x: {
             beginAtZero: true,
