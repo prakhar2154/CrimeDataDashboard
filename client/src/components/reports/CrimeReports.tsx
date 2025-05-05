@@ -30,8 +30,14 @@ export function CrimeReportsTable() {
   };
   
   const { data: crimesData, isLoading } = useQuery({
-    queryKey: ['/api/crimes', { type: crimeType, status: arrestStatus, dateRange, search: searchQuery }],
-    retry: false,
+    queryKey: ['/api/crimes', { 
+      type: crimeType !== 'all_types' ? crimeType : undefined, 
+      status: arrestStatus !== 'all_statuses' ? arrestStatus : undefined, 
+      dateRange, 
+      search: searchQuery 
+    }],
+    retry: true,
+    retryDelay: 1000,
   });
   
   const openCrimeDetails = (crimeId: string) => {

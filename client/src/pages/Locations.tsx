@@ -40,7 +40,12 @@ export default function Locations() {
   };
   
   const { data: locationsData, isLoading } = useQuery({
-    queryKey: ['/api/locations', { type: addressType, search: searchQuery }],
+    queryKey: ['/api/locations', { 
+      type: addressType !== 'all_types' ? addressType : undefined, 
+      search: searchQuery || undefined 
+    }],
+    retry: true,
+    retryDelay: 1000,
   });
   
   if (isLoading) {
@@ -61,10 +66,11 @@ export default function Locations() {
     );
   }
   
-  const locations = locationsData || [];
+  // Ensure we have an array of locations, not undefined or object
+  const locations = Array.isArray(locationsData) ? locationsData : [];
   const totalRecords = locations.length;
   const recordsPerPage = 10;
-  const totalPages = Math.ceil(totalRecords / recordsPerPage);
+  const totalPages = Math.ceil(totalRecords / recordsPerPage) || 1; // Ensure at least 1 page
   
   const startIdx = (currentPage - 1) * recordsPerPage;
   const endIdx = Math.min(startIdx + recordsPerPage, totalRecords);
@@ -74,7 +80,9 @@ export default function Locations() {
   const calculateCenter = () => {
     if (locations.length === 0) return [40.7128, -74.0060]; // Default to NYC
     
+    // Type-safe filter operation with explicit type annotation
     const validLocations = locations.filter((loc: any) => {
+      if (!loc.geolocation) return false;
       const [lat, lng] = loc.geolocation.split(',').map(Number);
       return !isNaN(lat) && !isNaN(lng);
     });
@@ -105,7 +113,8 @@ export default function Locations() {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   className="map-tiles"
                 />
-                {locations.map((location: any) => {
+                {Array.isArray(locations) && locations.map((location: any) => {
+                  if (!location || !location.geolocation) return null;
                   const [lat, lng] = location.geolocation.split(',').map(Number);
                   if (isNaN(lat) || isNaN(lng)) return null;
                   
