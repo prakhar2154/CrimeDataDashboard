@@ -31,6 +31,7 @@ export function CrimeReportsTable() {
   
   const { data: crimesData, isLoading } = useQuery({
     queryKey: ['/api/crimes', { type: crimeType, status: arrestStatus, dateRange, search: searchQuery }],
+    retry: false,
   });
   
   const openCrimeDetails = (crimeId: string) => {
@@ -89,10 +90,11 @@ export function CrimeReportsTable() {
     );
   }
   
-  const crimes = crimesData || [];
+  // Ensure we have an array of crimes, not undefined or object
+  const crimes = Array.isArray(crimesData) ? crimesData : [];
   const totalRecords = crimes.length;
   const recordsPerPage = 10;
-  const totalPages = Math.ceil(totalRecords / recordsPerPage);
+  const totalPages = Math.ceil(totalRecords / recordsPerPage) || 1; // Ensure at least 1 page
   
   const startIdx = (currentPage - 1) * recordsPerPage;
   const endIdx = Math.min(startIdx + recordsPerPage, totalRecords);
@@ -110,7 +112,10 @@ export function CrimeReportsTable() {
               <label className="block text-gray-400 text-sm font-medium mb-2">Crime Type</label>
               <Select 
                 value={crimeType} 
-                onValueChange={setCrimeType}
+                onValueChange={(value) => {
+                  setCrimeType(value);
+                  setCurrentPage(1); // Reset to first page on filter change
+                }}
               >
                 <SelectTrigger className="w-full py-2 px-3 bg-muted rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-white text-sm border border-secondary">
                   <SelectValue placeholder="All Types" />
@@ -130,7 +135,10 @@ export function CrimeReportsTable() {
               <label className="block text-gray-400 text-sm font-medium mb-2">Arrest Status</label>
               <Select 
                 value={arrestStatus} 
-                onValueChange={setArrestStatus}
+                onValueChange={(value) => {
+                  setArrestStatus(value);
+                  setCurrentPage(1); // Reset to first page on filter change
+                }}
               >
                 <SelectTrigger className="w-full py-2 px-3 bg-muted rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-white text-sm border border-secondary">
                   <SelectValue placeholder="All Statuses" />
